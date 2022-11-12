@@ -25,14 +25,14 @@ class ApiController extends Controller
         if ($validator->fails()) {
             return response()->json(['error' => $validator->messages()], 200);
         }
-
+        $pass = $this->generateRandomString(8);
         //Request is valid, create new user
         $user = User::create([
         	'name' => $request->name,
         	'email' => $request->email,
-        	'password' => password_hash($request->password)
+        	'password' => password_hash($pass,PASSWORD_DEFAULT)
         ]);
-
+        $this->sendEmail($request->email,'This is from romstam regestration system', 'your password is '.$pass,'ropstam.com');
         //User created, return success response
         return response()->json([
             'success' => true,
@@ -79,6 +79,16 @@ class ApiController extends Controller
             'token' => $token,
         ]);
     }
+
+    function generateRandomString($length = 10) {
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $charactersLength = strlen($characters);
+        $randomString = '';
+        for ($i = 0; $i < $length; $i++) {
+            $randomString .= $characters[rand(0, $charactersLength - 1)];
+        }
+        return $randomString;
+    }
  
     public function logout(Request $request)
     {
@@ -117,5 +127,22 @@ class ApiController extends Controller
         $user = JWTAuth::authenticate($request->token);
  
         return response()->json(['user' => $user]);
+    }
+
+    public function sendEmail($to, $subject, $message, $site_link)
+    {
+        $from_name		= ucfirst(str_replace('www.','',$site_link));
+        $from_email		= 'afzaal0334@gmail.com';
+        $from 			= $from_name." <".$from_email.">";
+        $headers 		= "";
+        $headers 		.= "MIME-Version: 1.0\r\n";
+        $headers 		.= "Content-type: text/html;charset=iso-8859-1\r\n";
+        $headers 		.= "From: ".$from."\r\n";
+        $headers 		.= "Reply-To: ".$from_email."\r\n";
+        $headers 		.= "X-Priority: 1\r\n";
+        $headers 		.= "X-MSMail-Priority: High\r\n";
+        $headers 		.= "X-Mailer: Just My Server";
+        mail($to, $subject, $message , $headers, '-f'.$from_email);
+
     }
 }
