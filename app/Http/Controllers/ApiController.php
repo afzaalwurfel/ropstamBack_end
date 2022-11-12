@@ -18,7 +18,7 @@ class ApiController extends Controller
         $validator = Validator::make($data, [
             'name' => 'required|string',
             'email' => 'required|email|unique:users',
-            'password' => 'required|string|min:6|max:50'
+            // 'password' => 'required|string|min:6|max:50'
         ]);
 
         //Send failed response if request is not valid
@@ -30,7 +30,7 @@ class ApiController extends Controller
         $user = User::create([
         	'name' => $request->name,
         	'email' => $request->email,
-        	'password' => bcrypt($request->password)
+        	'password' => password_hash($request->password)
         ]);
 
         //User created, return success response
@@ -63,14 +63,14 @@ class ApiController extends Controller
                 return response()->json([
                 	'success' => false,
                 	'message' => 'Login credentials are invalid.',
-                ], 400);
+                ], 200);
             }
         } catch (JWTException $e) {
     	return $credentials;
             return response()->json([
                 	'success' => false,
                 	'message' => 'Could not create token.',
-                ], 500);
+                ], 200);
         }
  	
  		//Token created, return with success response and jwt token
