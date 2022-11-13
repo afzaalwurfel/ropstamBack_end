@@ -15,6 +15,12 @@ class CreateCarsTable extends Migration
     {
         Schema::create('cars', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');
+            $table->string('car_name');
+            $table->string('velical_class');
+            $table->string('velical_brand');
+            $table->string('car_color');
+            $table->string('car_engineCapacity');
             $table->timestamps();
         });
     }

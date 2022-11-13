@@ -9,6 +9,8 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Validator;
 
+use Yajra\DataTables\DataTables;
+
 class CarsController extends Controller
 {
     protected $user;
@@ -23,11 +25,19 @@ class CarsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        return $this->user
-            ->cars()
-            ->get();
+         $cars = $this->user->cars()->get();
+         return Datatables::of($cars)->addIndexColumn()->addColumn('action',function ($row){
+            $url = url("delete/" . $row->id);
+            $icon = $row->status == 0 ? 'check' : 'slash';
+            $textColor = $row->status == 0 ? 'success' : 'warning';
+            return $btnAction = '<center>
+                <a  href="' . $url . '" data-item-id="' . $row->id . '"><i class="feather icon-eye text-info icon-action"></i></a>
+                 <a  href="#"><i data-id="' . $row->id . '" data-status="' . $row->status . '" class="change-contractor-status feather icon-' . $icon . ' text-' . $textColor . ' icon-action"></i></a>
+                  <a  href="#"><i data-id="' . $row->id . '" class="delete-contractor feather icon-trash text-danger icon-action"></i></a>
+                </center>';
+         })->rawColumns(['action'])->make(true);
     }
 
     /**
